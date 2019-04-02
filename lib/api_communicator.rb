@@ -3,11 +3,23 @@ require 'json'
 require 'pry'
 
 def get_character_movies_from_api(character)
+  array_of_films = []
   #make the web request
   response_string = RestClient.get('http://www.swapi.co/api/people/')
   response_hash = JSON.parse(response_string)
-  
-  # NOTE: in this demonstration we name many of the variables _hash or _array. 
+# JSON.parse is built into the gem that allows us to iterate over a hash in the
+#ruby language interpreter
+  response_hash["results"].each do |attribute, attribute_value|
+      if attribute["name"].downcase == character
+        attribute["films"].each do |film_link|
+    array_of_films << JSON.parse(RestClient.get(film_link))
+        end
+      end
+  end
+  return array_of_films
+end
+
+  # NOTE: in this demonstration we name many of the variables _hash or _array.
   # This is done for educational purposes. This is not typically done in code.
 
 
@@ -20,15 +32,18 @@ def get_character_movies_from_api(character)
   # this collection will be the argument given to `parse_character_movies`
   #  and that method will do some nice presentation stuff: puts out a list
   #  of movies by title. play around with puts out other info about a given film.
-end
 
-def print_movies(films_hash)
+
+def print_movies(films)
   # some iteration magic and puts out the movies in a nice list
+films.each do |details|
+  puts details["title"]
+  end
 end
 
 def show_character_movies(character)
-  films_array = get_character_movies_from_api(character)
-  print_movies(films_array)
+  films = get_character_movies_from_api(character)
+  print_movies(films)
 end
 
 ## BONUS
